@@ -124,7 +124,13 @@ def leer_resenas(cfg):
         headers={"X-Goog-Api-Key": llave, "X-Goog-FieldMask": "reviews"},
         timeout=30,
     )
-    r.raise_for_status()
+    if not r.ok:
+        # Google explica el motivo (API sin activar, sin facturación, llave restringida…) en el cuerpo
+        try:
+            motivo = r.json()["error"]["message"]
+        except Exception:
+            motivo = r.text[:300]
+        raise RuntimeError(f"Google respondió {r.status_code}: {motivo}")
     crudas = r.json().get("reviews") or []
 
     resenas = []
