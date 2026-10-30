@@ -1,0 +1,20 @@
+{
+  "nombre_local": "Bee's Pizza's",
+  "direccion_google": "Bee's Pizza Sullivan, C. James Sullivan 159, San Rafael, Cuauhtémoc, 06470 Ciudad de México, CDMX",
+
+  "revisar_afluencia": false,
+  "revisar_resenas": true,
+  "google_place_id": "ChIJCcFtXAD50YUR7Tk6SkPZnK8",
+
+  "vapid_public": "",
+  "contacto_vapid": "mailto:TU_CORREO@ejemplo.com",
+
+  "umbral_pico": 70,
+  "umbral_baja": 45,
+  "lecturas_para_confirmar": 2,
+  "aviso_anticipado": true,
+
+  "cada_minutos": 3,
+  "duracion_minutos": 18,
+  "horario": ["12:00", "23:30"]
+}

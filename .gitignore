@@ -1,0 +1,39 @@
+# Sesiones de Google guardadas (nunca subir)
+estado_google.json
+*storage_state*.json
+*sesion*.json
+*session*.json
+cookies*.json
+
+# Llaves, secretos y variables de entorno
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*llave*
+*secret*
+*credencial*
+*credential*
+vapid*.json
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Pruebas del scraper de afluencia (pueden mostrar datos de la cuenta de Google)
+captura*.png
+texto_*.txt
+jdata_crudo.json
+aria_labels.json
+explorar.py
+diagnostico.py
+iniciar_sesion.py
+
+# Sistema
+.DS_Store
+Thumbs.db

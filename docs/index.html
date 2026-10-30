@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Afluencia Bee's</title>
+<meta name="theme-color" content="#F2A900">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Afluencia">
+<style>
+  :root {
+    --bg: #FAF7F0; --card: #FFFFFF; --text: #1F1A10; --muted: #6B6250; --line: #E8E1D0;
+    --amber: #F2A900; --amber-soft: #FCEFC7; --hot: #D9480F; --ok: #2B8A3E; --bar: #E9DFC4;
+    --live: #1F1A10;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #15130E; --card: #201D16; --text: #F5EFE0; --muted: #A9A08A; --line: #332E23;
+      --amber-soft: #3A2F10; --bar: #3A3527; --live: #F5EFE0; --hot: #FF7A45; --ok: #5CC46F; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 16px 32px; }
+  main { max-width: 520px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 12px; padding: 18px 0 10px; }
+  header img { width: 40px; height: 40px; border-radius: 10px; }
+  header h1 { font-size: 20px; margin: 0; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin: 12px 0; }
+  .card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .estado { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .pct { font-size: 64px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .pct small { font-size: 24px; font-weight: 700; color: var(--muted); }
+  .chip { display: inline-block; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 14px;
+    background: var(--amber-soft); }
+  .chip.pico { background: var(--hot); color: #fff; }
+  .chip.tranquilo { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 10px; }
+  .barra { height: 10px; border-radius: 99px; background: var(--bar); margin-top: 14px; overflow: hidden; }
+  .barra > div { height: 100%; background: var(--amber); border-radius: 99px; transition: width .4s; }
+  .barra > div.pico { background: var(--hot); }
+  svg text { fill: var(--muted); font-size: 11px; }
+  .leyenda { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .leyenda i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+  ul.horas { list-style: none; margin: 0; padding: 0; }
+  ul.horas li { padding: 8px 0; border-top: 1px solid var(--line); display: flex; justify-content: space-between; }
+  ul.horas li:first-child { border-top: 0; }
+  button { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 14px 16px; width: 100%;
+    background: var(--amber); color: #1F1A10; cursor: pointer; }
+  button.sec { background: transparent; border: 1px solid var(--line); color: var(--text); padding: 10px 12px; width: auto; }
+  .nota { font-size: 14px; color: var(--muted); }
+  .paso { margin-top: 14px; }
+  .paso b { display: block; margin-bottom: 4px; }
+  textarea { width: 100%; font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(--bg); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px; resize: vertical; min-height: 64px; }
+  .fila { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .ok { color: var(--ok); font-weight: 700; }
+  .error { color: var(--hot); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icon-192.png" alt="">
+    <div>
+      <h1 id="nombre">Bee's Pizza's</h1>
+      <p>Afluencia en vivo · datos de Google Maps</p>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Ahorita</h2>
+    <div class="estado">
+      <div class="pct" id="pct">—<small>%</small></div>
+      <span class="chip" id="chip">Cargando…</span>
+    </div>
+    <div class="barra"><div id="barra" style="width:0"></div></div>
+    <div class="sub" id="sub">&nbsp;</div>
+  </section>
+
+  <section class="card">
+    <h2>Hoy</h2>
+    <svg id="grafica" viewBox="0 0 340 170" width="100%" role="img" aria-label="Afluencia de hoy por hora"></svg>
+    <div class="leyenda">
+      <span><i style="background:var(--bar)"></i>Lo normal</span>
+      <span><i style="background:var(--live);border-radius:50%"></i>Hoy en vivo</span>
+      <span><i style="background:var(--hot);height:2px;border-radius:0;vertical-align:3px"></i>Umbral de pico</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Horas fuertes de hoy</h2>
+    <ul class="horas" id="horas"><li>—</li></ul>
+  </section>
+
+  <section class="card" id="notif">
+    <h2>Notificaciones</h2>
+    <p class="nota" id="notifEstado">Recibe un aviso cuando haya pico, cuando baje la gente, una hora antes de la hora fuerte y cuando llegue una reseña nueva en Google Maps.</p>
+    <p class="nota" id="iosNota" hidden>En iPhone: primero toca <b>Compartir → Agregar a pantalla de inicio</b>, abre la app desde el ícono y luego activa las notificaciones.</p>
+    <button id="btnActivar">Activar notificaciones en este celular</button>
+
+    <div id="config" hidden>
+      <div class="paso" id="pasoLlaves" hidden>
+        <b>1. Llave privada → secreto <code>VAPID_PRIVATE_KEY</code> en GitHub</b>
+        <textarea id="txtPrivada" readonly></textarea>
+        <div class="fila"><button class="sec" data-copiar="txtPrivada">Copiar</button></div>
+        <b style="margin-top:12px">2. Llave pública → campo <code>vapid_public</code> de docs/config.json</b>
+        <textarea id="txtPublica" readonly></textarea>
+        <div class="fila"><button class="sec" data-copiar="txtPublica">Copiar</button></div>
+        <p class="nota">Guarda la llave privada solo en el secreto de GitHub. No la pongas en ningún archivo.</p>
+      </div>
+      <div class="paso">
+        <b><span id="numSus">3</span>. Suscripción de este celular → secreto <code>PUSH_SUBSCRIPTIONS</code></b>
+        <textarea id="txtSus" readonly rows="5"></textarea>
+        <div class="fila"><button class="sec" data-copiar="txtSus">Copiar</button></div>
+        <p class="nota">Si activas más celulares, junta sus suscripciones en la misma lista: <code>[ {…}, {…} ]</code>.</p>
+      </div>
+    </div>
+    <p class="nota error" id="notifError" hidden></p>
+  </section>
+</main>
+
+<script>
+const ZONA = 'America/Mexico_City';
+let CFG = {};
+
+// ---------- de dónde leer los datos: el repo en GitHub (siempre al día) o local
+function urlDatos(archivo) {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = location.pathname.split('/').filter(Boolean)[0];
+  if (m && repo) return `https://raw.githubusercontent.com/${m[1]}/${repo}/main/docs/data/${archivo}?t=${Date.now()}`;
+  return `data/${archivo}?t=${Date.now()}`;
+}
+const hoyISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date());
+const horaAhora = () => Number(new Intl.DateTimeFormat('en-US', { timeZone: ZONA, hour: 'numeric', hour12: false }).format(new Date())) % 24;
+
+async function cargar() {
+  try {
+    CFG = await (await fetch('config.json?t=' + Date.now())).json();
+    document.getElementById('nombre').textContent = CFG.nombre_local || "Bee's Pizza's";
+  } catch (e) {}
+  let estado = null, filas = [];
+  try { estado = await (await fetch(urlDatos('estado.json'))).json(); } catch (e) {}
+  try {
+    const csv = await (await fetch(urlDatos('historial.csv'))).text();
+    const hoy = hoyISO();
+    filas = csv.trim().split('\n').slice(1).map(l => l.split(','))
+      .filter(c => c[0] === hoy && c[2] !== '')
+      .map(c => ({ h: Number(c[1].slice(0, 2)) + Number(c[1].slice(3, 5)) / 60, v: Number(c[2]) }));
+  } catch (e) {}
+  pintarEstado(estado);
+  pintarGrafica(estado, filas);
+  pintarHoras(estado);
+}
+
+function pintarEstado(est) {
+  const pct = document.getElementById('pct'), chip = document.getElementById('chip'),
+        sub = document.getElementById('sub'), barra = document.getElementById('barra');
+  const u = (est && est.umbrales) || { pico: CFG.umbral_pico || 70, baja: CFG.umbral_baja || 45 };
+  const ul = est && est.ultima_lectura;
+  if (!ul) { chip.textContent = 'Sin datos aún'; chip.className = 'chip tranquilo'; sub.textContent = 'Todavía no hay lecturas del monitor.'; return; }
+  const v = ul.en_vivo;
+  const cuando = new Date(ul.momento).toLocaleTimeString('es-MX', { timeZone: ZONA, hour: '2-digit', minute: '2-digit' });
+  const minutos = Math.round((Date.now() - new Date(ul.momento)) / 60000);
+  pct.innerHTML = (v == null ? '—' : v) + '<small>%</small>';
+  barra.style.width = (v || 0) + '%';
+  barra.className = (est.en_pico || v >= u.pico) ? 'pico' : '';
+  if (est.en_pico) { chip.textContent = '🔥 Pico'; chip.className = 'chip pico'; }
+  else if (v == null) { chip.textContent = 'Sin dato en vivo'; chip.className = 'chip tranquilo'; }
+  else if (v <= u.baja) { chip.textContent = 'Tranquilo'; chip.className = 'chip tranquilo'; }
+  else { chip.textContent = 'Movido'; chip.className = 'chip'; }
+  const normal = ul.normal != null ? ` · Lo normal a esta hora: ${ul.normal}%` : '';
+  const viejo = minutos > 45 ? ' · (dato viejo: el monitor puede estar fuera de horario)' : '';
+  sub.textContent = `Actualizado ${cuando}${normal}${viejo}`;
+}
+
+function pintarGrafica(est, filas) {
+  const svg = document.getElementById('grafica');
+  const [hi, hf] = (CFG.horario || ['12:00', '23:30']).map(s => Number(s.slice(0, 2)));
+  const desde = hi, hasta = Math.min(hf + 1, 24), n = hasta - desde;
+  const W = 340, H = 170, izq = 26, der = 6, arr = 8, abj = 22, aw = W - izq - der, ah = H - arr - abj;
+  const x = h => izq + (h - desde) / n * aw, y = v => arr + ah - v / 100 * ah;
+  const curva = (est && est.fecha_curva === hoyISO() && est.curva_hoy) || null;
+  const pico = (est && est.umbrales && est.umbrales.pico) || CFG.umbral_pico || 70;
+  let s = '';
+  for (const g of [0, 50, 100]) s += `<line x1="${izq}" x2="${W - der}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${izq - 4}" y="${y(g) + 4}" text-anchor="end">${g}</text>`;
+  const bw = aw / n;
+  for (let h = desde; h < hasta; h++) {
+    const v = curva ? curva[h] : 0;
+    if (v) s += `<rect x="${x(h) + 2}" y="${y(v)}" width="${bw - 4}" height="${y(0) - y(v)}" rx="3" fill="var(--bar)"/>`;
+    if ((h - desde) % 2 === 0) s += `<text x="${x(h) + bw / 2}" y="${H - 6}" text-anchor="middle">${h}h</text>`;
+  }
+  s += `<line x1="${izq}" x2="${W - der}" y1="${y(pico)}" y2="${y(pico)}" stroke="var(--hot)" stroke-dasharray="4 4" stroke-width="1.5"/>`;
+  const pts = filas.filter(p => p.h >= desde && p.h <= hasta);
+  if (pts.length > 1) s += `<polyline fill="none" stroke="var(--live)" stroke-width="2" stroke-linejoin="round" points="${pts.map(p => `${x(p.h)},${y(p.v)}`).join(' ')}"/>`;
+  for (const p of pts) s += `<circle cx="${x(p.h)}" cy="${y(p.v)}" r="3" fill="var(--live)"><title>${p.v}%</title></circle>`;
+  const ahora = horaAhora();
+  if (ahora >= desde && ahora < hasta) s += `<line x1="${x(ahora + 0.5)}" x2="${x(ahora + 0.5)}" y1="${arr}" y2="${y(0)}" stroke="var(--amber)" stroke-width="1"/>`;
+  if (!curva && !pts.length) s += `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">Sin datos de hoy todavía</text>`;
+  svg.innerHTML = s;
+}
+
+function pintarHoras(est) {
+  const ul = document.getElementById('horas');
+  const curva = est && est.fecha_curva === hoyISO() && est.curva_hoy;
+  const pico = (est && est.umbrales && est.umbrales.pico) || CFG.umbral_pico || 70;
+  if (!curva) { ul.innerHTML = '<li>Sin datos de hoy todavía</li>'; return; }
+  const bloques = []; let ini = null, max = 0;
+  for (let h = 0; h <= 24; h++) {
+    const alto = h < 24 && curva[h] >= pico;
+    if (alto) { if (ini === null) { ini = h; max = 0; } max = Math.max(max, curva[h]); }
+    else if (ini !== null) { bloques.push([ini, h, max]); ini = null; }
+  }
+  ul.innerHTML = bloques.length
+    ? bloques.map(([a, b, m]) => `<li><span>${a}:00 – ${b}:00</span><b>hasta ${m}%</b></li>`).join('')
+    : '<li>Hoy normalmente no llega a pico</li>';
+}
+
+// ---------- notificaciones push
+const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const deB64url = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4); return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+const guardado = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+
+async function generarLlaves() {
+  const par = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const publica = b64url(await crypto.subtle.exportKey('raw', par.publicKey));
+  const privada = (await crypto.subtle.exportKey('jwk', par.privateKey)).d;
+  return { publica, privada };
+}
+
+async function activar() {
+  const err = document.getElementById('notifError'); err.hidden = true;
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) throw new Error(esIOS() ? 'Primero agrega la página a tu pantalla de inicio y ábrela desde el ícono.' : 'Este navegador no soporta notificaciones push.');
+    const permiso = await Notification.requestPermission();
+    if (permiso !== 'granted') throw new Error('No se dio permiso de notificaciones. Actívalo en los ajustes del navegador.');
+    const reg = await navigator.serviceWorker.ready;
+
+    let publica = (CFG.vapid_public || '').trim(), nuevas = null;
+    if (!publica) {
+      const previas = guardado('llaves_vapid');
+      nuevas = previas ? JSON.parse(previas) : await generarLlaves();
+      guardado('llaves_vapid', JSON.stringify(nuevas));
+      publica = nuevas.publica;
+    }
+    let sus = await reg.pushManager.getSubscription();
+    if (sus) {
+      const actual = sus.options && sus.options.applicationServerKey && b64url(sus.options.applicationServerKey);
+      if (actual && actual !== publica) { await sus.unsubscribe(); sus = null; }
+    }
+    if (!sus) sus = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: deB64url(publica) });
+
+    document.getElementById('config').hidden = false;
+    document.getElementById('pasoLlaves').hidden = !nuevas;
+    document.getElementById('numSus').textContent = nuevas ? '3' : '1';
+    if (nuevas) {
+      document.getElementById('txtPrivada').value = nuevas.privada;
+      document.getElementById('txtPublica').value = nuevas.publica;
+    }
+    document.getElementById('txtSus').value = JSON.stringify([sus.toJSON()]);
+    document.getElementById('notifEstado').innerHTML = '<span class="ok">✓ Este celular ya puede recibir avisos.</span> Copia los datos de abajo a GitHub para terminar.';
+    document.getElementById('btnActivar').textContent = 'Volver a mostrar mis datos';
+  } catch (e) { err.textContent = e.message; err.hidden = false; }
+}
+
+function esIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+
+document.getElementById('btnActivar').addEventListener('click', activar);
+document.addEventListener('click', async e => {
+  const id = e.target.dataset && e.target.dataset.copiar; if (!id) return;
+  const t = document.getElementById(id); t.select();
+  try { await navigator.clipboard.writeText(t.value); } catch (x) { document.execCommand('copy'); }
+  e.target.textContent = '¡Copiado!'; setTimeout(() => e.target.textContent = 'Copiar', 1500);
+});
+
+if (esIOS() && !navigator.standalone) document.getElementById('iosNota').hidden = false;
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+cargar();
+setInterval(cargar, 2 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) cargar(); });
+</script>
+</body>
+</html>

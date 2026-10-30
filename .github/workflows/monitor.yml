@@ -1,0 +1,58 @@
+name: Monitor de afluencia
+
+on:
+  # GitHub usa hora UTC. Ciudad de México = UTC-6 todo el año.
+  # 18:00-23:59 UTC = 12:00-17:59 CDMX  |  00:00-05:59 UTC = 18:00-23:59 CDMX
+  # El horario exacto lo decide "horario" en docs/config.json.
+  schedule:
+    - cron: "0 18-23 * * *"
+    - cron: "0 0-5 * * *"
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "normal = una ronda de lecturas | prueba = solo manda notificación de prueba"
+        type: choice
+        options: [normal, prueba]
+        default: normal
+
+permissions:
+  contents: write
+
+# Nunca dos corridas al mismo tiempo (evita avisos dobles y choques al guardar).
+concurrency:
+  group: monitor-afluencia
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Leer afluencia y avisar
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_SUBSCRIPTIONS: ${{ secrets.PUSH_SUBSCRIPTIONS }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: python monitor/monitor.py ${{ inputs.modo == 'prueba' && '--prueba' || '' }}
+
+      - name: Guardar historial en el repositorio
+        if: always()
+        run: |
+          git config user.name "monitor-afluencia"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          if ! git diff --cached --quiet; then
+            git commit -m "Lecturas $(TZ=America/Mexico_City date '+%Y-%m-%d %H:%M')"
+            git pull --rebase
+            git push
+          fi
