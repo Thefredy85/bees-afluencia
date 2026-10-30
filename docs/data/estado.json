@@ -15,7 +15,7 @@
   "fecha_curva": null,
   "ultima_resena_ts": null,
   "resenas_conocidas": [],
-  "fallos_resenas_seguidos": 1,
+  "fallos_resenas_seguidos": 2,
   "aviso_fallo_resenas_enviado": false,
   "umbrales": {
     "pico": 70,
